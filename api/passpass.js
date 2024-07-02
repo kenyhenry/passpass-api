@@ -1,6 +1,7 @@
 // How to use passpass api
 const WebSocket = require('ws');
 
+timeout = null
 async function startWebSocketClient() {
     const ws = new WebSocket('ws://localhost:8765');
     ws.on('open', function open() {
@@ -10,7 +11,8 @@ async function startWebSocketClient() {
 
     ws.on('disconnected', (message) => {
         console.log(message)
-        // TODO handle
+        ws.close();
+        reconnect()
     });
 
     ws.on('message', (message) => {
@@ -35,7 +37,15 @@ async function startWebSocketClient() {
 
     ws.on('close', function close() {
         console.log('Disconnected from WebSocket server');
-        // TODO handle
+        ws.close();
+        reconnect()
+    });
+
+    ws.on('error', (error) => {
+        console.error(`Connection error: ${error.message}`);
+        // Close the socket to ensure proper cleanup
+        ws.close();
+        reconnect()
     });
 
     // /!\ Do not toucvh /!\ awaiter for event receive
@@ -46,4 +56,11 @@ async function startWebSocketClient() {
     }
 }
 
-startWebSocketClient().catch(console.error);
+function reconnect(){
+    clearTimeout(timeout)
+    timeout = setTimeout(startWebSocketClient, 1000);
+}
+
+startWebSocketClient().catch((e)=>{
+    console.log(e)
+});
