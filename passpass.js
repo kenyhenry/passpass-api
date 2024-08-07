@@ -17,23 +17,30 @@ async function startWebSocketClient() {
     });
 
     ws.on('message', (message) => {
-        data = message.toString('utf8');
-        console.log('message: ',data)
-    });
-
-    ws.on('scan', (message) => {
-      const parsedMessage = JSON.parse(message);
-      console.log(`Received message: ${parsedMessage.data}`);
-      tpe = parsedMessage.TPE
-      rfid = parsedMessage.RFID
-      // EXAMPLE:
-      // user with RFID scan on TPE, verify if subscription is good or not
-      user_subscription = "ok"
-      if(user_subscription === "ok")
-        ws.send(JSON.stringify({ action: 'scanComplete', status: 'succes', TPE: tpe, RFID: rfid }));
-      else{
-        ws.send(JSON.stringify({ action: 'scanComplete', status: 'failed', TPE: tpe, RFID: rfid }));
-      }
+        try{
+            const parsedMessage = JSON.parse(message);
+            if(parsedMessage.event){
+                console.log(`Received message json: ${parsedMessage.event}`);
+                if(parsedMessage.event === 'scan'){
+                    tpe = parsedMessage.TPE
+                    rfid = parsedMessage.RFID
+                    console.log(tpe, rfid)
+                    // EXAMPLE:
+                    // user with RFID scan on TPE, verify if subscription is good or not then set {user_subscription}
+                    user_subscription = "ok"
+                    if(user_subscription === "ok")
+                      ws.send(JSON.stringify({ action: 'scanComplete', status: 'success', TPE: tpe, RFID: rfid }));
+                    else{
+                      ws.send(JSON.stringify({ action: 'scanComplete', status: 'failed', TPE: tpe, RFID: rfid }));
+                    }
+                }
+            }else{
+                console.log(message)
+            }
+        } catch(error){
+            // NOTHING TO DO
+            // console.log(error)
+        }
     });
 
     ws.on('close', function close() {
