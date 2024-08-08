@@ -1,10 +1,10 @@
 // How to use passpass api
 const WebSocket = require('ws');
 
-apiKey = "31204c34-03ce-4b31-b435-6206b8caefd8"
+apiKey = "f90ab888-f47f-45b9-ac21-4d56f2a6207c"
 timeout = null
 async function startWebSocketClient() {
-    const ws = new WebSocket('ws://localhost:8765');
+    const ws = new WebSocket('ws://5.42.158.106:80/passpass');
     ws.on('open', function open() {
         // send api key to authentify
         ws.send(JSON.stringify({'apiKey':apiKey}));
